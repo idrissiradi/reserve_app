@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Example 2</title>
+    <style>
+        body {
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table tr td {
+            padding: 0;
+        }
+
+        table tr td:last-child {
+            text-align: right;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .large {
+            font-size: 1.75em;
+        }
+
+        .total {
+            font-weight: bold;
+            color: #fb7578;
+        }
+
+        .logo-container {
+            margin: 20px 0 70px 0;
+        }
+
+        .invoice-info-container {
+            font-size: 0.875em;
+        }
+
+        .invoice-info-container td {
+            padding: 4px 0;
+        }
+
+        .client-name {
+            font-size: 1.5em;
+            vertical-align: top;
+        }
+
+        .line-items-container {
+            margin: 70px 0;
+            font-size: 0.875em;
+        }
+
+        .line-items-container th {
+            text-align: left;
+            color: #605d5d;
+            border-bottom: 2px solid #ddd;
+            padding: 5px 0 10px 0;
+            font-size: 0.75em;
+            text-transform: uppercase;
+        }
+
+        .line-items-container th:last-child {
+            text-align: right;
+        }
+
+        .line-items-container td {
+            padding: 5px 0;
+        }
+
+        .line-items-container tbody tr:first-child td {
+            padding-top: 5px;
+        }
+
+        .line-items-container.has-bottom-border tbody tr:last-child td {
+            padding-bottom: 5px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .line-items-container.has-bottom-border {
+            margin-bottom: 0;
+        }
+
+        .line-items-container th.heading-quantity {
+            width: 50px;
+        }
+
+        .line-items-container th.heading-price {
+            text-align: right;
+            width: 100px;
+        }
+
+        .line-items-container th.heading-subtotal {
+            width: 100px;
+        }
+
+        .payment-info {
+            width: 38%;
+            font-size: 0.75em;
+            line-height: 1.5;
+        }
+
+        .footer {
+            margin-top: 100px;
+
+        }
+
+        .footer-thanks {
+            font-size: 1.125em;
+        }
+
+        .footer-info {
+            float: right;
+            margin-top: 5px;
+            font-size: 0.75em;
+            color: #ccc;
+        }
+
+        .footer-info span {
+            padding: 0 5px;
+            color: black;
+        }
+
+        .footer-info span:last-child {
+            padding-right: 0;
+        }
+
+        .page-container {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div class="logo-container">
+        <img style="height: 50px" src="static/img/logo.jpeg" />
+    </div>
+
+    <table class="invoice-info-container">
+        <tr>
+            <td rowspan="2" class="client-name">Client :</td>
+            <td><strong>{{client}}</strong></td>
+        </tr>
+        <tr>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Date: <strong>{{pdf.created_at|date:"d-m-Y"}}</strong></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Adress: <strong>{{pdf.address}}</strong></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                {% if pdf.type == "f" %}
+                Facture
+                {% elif pdf.type == "b" %}
+                Bon de commande
+                {% else %}
+                Devis
+                {% endif %} No:
+                <strong>{{pdf.id}}/{{pdf.created_at|date:"Y"}}</strong>
+                <strong>
+                    {% if pdf.is_payed %}
+                    est paye
+                    {% else %}
+                    impaye
+                    {% endif %}
+                </strong>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+
+    <table class="line-items-container">
+        <thead>
+            <tr>
+                <th class="heading-description">Desination</th>
+                <th class="heading-price">Prix</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% if pdf.type == "f" %}
+                <td>{{room.name}} x {{pdf.days}} jours</td>
+                <td class="bold">{{price}} MAD</td>
+                {% elif pdf.type == "b" %}
+                <td>Les charges</td>
+                <td class="bold">{{pdf.charge}} MAD</td>
+                {% endif %}
+            </tr>
+
+            {% for other in others %}
+            <tr>
+                <td>{{other.name}}</td>
+                <td class="bold">{{other.price}} MAD</td>
+            </tr>
+            {% endfor %}
+
+            {% if pdf.type == "f" %}
+            {% for plate in plates %}
+            <tr>
+                <td>
+                    {% if plate.type == "B" %}
+                    petit déjeuner
+                    {% elif plate.type == "L" %}
+                    déjeuner
+                    {% elif plate.type == "D"  %}
+                    dîner
+                    {% endif %}
+                </td>
+                <td class="bold">{{plate.price}} x {{plate.number}} </td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+
+            {% if pdf.avance %}
+            <tr>
+                <td>Avance</td>
+                <td class="bold">-{{pdf.avance}} MAD</td>
+            </tr>
+            {% endif %}
+
+        </tbody>
+    </table>
+
+    <table class="line-items-container has-bottom-border">
+        <thead>
+            <tr>
+                <th>Total TTC</th>
+                <th>Mode de payment</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="large total">
+                    {% if pdf.type == "f" %}
+                    {{total}} MAD
+                    {% elif pdf.type == "b" %}
+                    {{total_charge}} MAD
+                    {% endif %}
+                </td>
+                <td class="payment-info">
+                    <div>
+                        {% if pdf.payment_type == "c" %}
+                        Cheque
+                        {% elif pdf.payment_type == "e" %}
+                        Espece
+                        {% elif pdf.payment_type == "t" %}
+                        TPE
+                        {% endif %}
+                        <br>
+                        {% if pdf.cheque_info %}
+                        {{pdf.cheque_info}}
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="payment-info">
+                    <div>
+                        la somme de <br><strong>
+                            {% if pdf.type == "f" %}
+                            {{total_word}}
+                            {% elif pdf.type == "b" %}
+                            {{total_charge_word}}
+                            {% endif %}
+                        </strong> Dirhams TTC</div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <div class="footer-info">
+            <span>Poste Asni 42 150 - B.P :94 El Haouz - Marrakech - Tél : 05 24 48 49 17 - Gsm : 06 61 69 27 65 - 06 68
+                25 34 51 </span>
+            <br>
+            <span>RC : 30555 - Patiente : 46419007 - IF : 06521880 - CNSS : 7650139 ICE : 000227377000048</span>
+        </div>
+    </div>
+</body>
+
+</html>

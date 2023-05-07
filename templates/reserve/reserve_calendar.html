@@ -1,0 +1,29 @@
+<script>
+	data_list = [];
+	const data = JSON.parse('{{data|escapejs}}');
+
+	for (let i = 0; i < data.length; i++) {
+		const element = data[i];
+		obj = {
+			start: element.start_date,
+			end: element.end_date,
+			overlap: false,
+			display: 'background',
+		};
+		data_list.push(obj);
+	}
+	console.log(data);
+	console.log(data_list);
+
+	document.addEventListener('DOMContentLoaded', function () {
+		var calendarEl = document.getElementById('calendar');
+		var calendar = new FullCalendar.Calendar(calendarEl, {
+			initialView: 'dayGridMonth',
+			locale: 'fr',
+			events: data_list,
+		});
+		calendar.render();
+	});
+</script>
+
+<div id="calendar"></div>

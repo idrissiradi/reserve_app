@@ -1,0 +1,49 @@
+{% extends 'base.html' %} {% block content %} {% include "partials/nav.html" %}
+<div class="mx-auto max-w-7xl">
+	<!-- component -->
+	<section class="container mx-auto p-6 font-mono">
+		<div class="w-full mb-8 overflow-hidden rounded-lg shadow-lg">
+			<div class="w-full overflow-x-auto overflow-y-auto">
+				<table class="w-full">
+					<thead>
+						<tr
+							class="text-md font-semibold tracking-wide text-left text-gray-100 bg-violet-500 uppercase border-b border-gray-600"
+						>
+							<th class="px-4 py-3">Nom du client</th>
+							<th class="px-4 py-3">
+								réservation : date de début
+							</th>
+							<th class="px-4 py-3">réservation : date de fin</th>
+							<th class="px-4 py-3">montant total</th>
+						</tr>
+					</thead>
+					<tbody class="bg-white">
+						{% for reserve in reserves %}
+						<tr class="text-gray-700">
+							<td class="px-4 py-3 border">
+								<div class="flex items-center text-sm">
+									<div>
+										<p class="font-semibold text-black">
+											{{reserve.client}}
+										</p>
+									</div>
+								</div>
+							</td>
+							<td class="px-4 py-3 text-ms font-semibold border">
+								{{reserve.start_date}}
+							</td>
+							<td class="px-4 py-3 text-ms font-semibold border">
+								{{reserve.end_date}}
+							</td>
+							<td class="px-4 py-3 text-sm border">
+								{{reserve.price}}
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</section>
+</div>
+{% endblock content %}

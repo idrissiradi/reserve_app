@@ -1,0 +1,184 @@
+{% extends 'base.html' %} {% block content %} {% include "partials/nav.html" %}
+<div class="mx-auto max-w-7xl">
+	<div class="mx-auto max-w-2xl py-4 px-4 lg:max-w-7xl">
+		<h2 class="text-2xl font-bold tracking-tight text-gray-900">
+			Statistiques
+		</h2>
+	</div>
+	<div class="flex flex-wrap mt-4">
+		<form
+			action="{% url 'reserve:statistics' %}"
+			method="GET"
+			class="w-full"
+		>
+			<div class="col-span-1 sm:col-span-3">
+				<label
+					for="month"
+					class="block text-sm font-medium text-gray-700"
+					>par Mois:</label
+				>
+				<select
+					id="month"
+					name="month"
+					autocomplete="month-name"
+					class="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+				>
+					<option></option>
+					<option value="1">janvier</option>
+					<option value="2">fevriere</option>
+					<option value="3">mars</option>
+					<option value="4">avril</option>
+					<option value="5">mai</option>
+					<option value="6">juin</option>
+					<option value="7">juillet</option>
+					<option value="8">août</option>
+					<option value="9">septembre</option>
+					<option value="10">octobre</option>
+					<option value="11">novembre</option>
+					<option value="12">décembre</option>
+				</select>
+			</div>
+
+			<div class="col-span-6 sm:col-span-3">
+				<label
+					for="country"
+					class="block text-sm font-medium text-gray-700"
+					>par Intermédiaire:</label
+				>
+				<select
+					id="country"
+					name="user"
+					autocomplete="country-name"
+					class="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-4 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+				>
+					<option></option>
+
+					{% for user in users %}
+					<option value="{{user.id}}">{{user.full_name}}</option>
+
+					{% endfor %}
+				</select>
+			</div>
+
+			<div>
+				<label
+					for="reserve_date"
+					class="block text-sm font-medium text-gray-700"
+					>par date:</label
+				>
+				<div class="mt-1">
+					<input
+						id="reserve_date"
+						name="reserve_date"
+						type="date"
+						autocomplete="reserve_date"
+						class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+					/>
+				</div>
+			</div>
+
+			<div>
+				<label
+					for="type_payment"
+					class="block text-sm font-medium text-gray-700"
+					>type de payment</label
+				>
+				<select
+					id="type_payment"
+					name="payment_type"
+					autocomplete="payment_type"
+					class="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+				>
+					<option></option>
+					<option>Cheque</option>
+					<option>Espece</option>
+					<option>TPE</option>
+				</select>
+			</div>
+
+			<button
+				type="submit"
+				class="ml-4 mt-4 py-2 px-2 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg"
+			>
+				Valider
+			</button>
+		</form>
+	</div>
+
+	<div class="flex flex-wrap bg-pink-500 mt-4">
+		<div class="mt-4 w-full lg:w-1/3 xl:w-3/6 px-5 mb-4">
+			<div
+				class="relative flex flex-col min-w-0 break-words bg-white rounded mb-3 xl:mb-0 shadow-lg"
+			>
+				<div class="flex-auto p-4">
+					<div class="flex flex-wrap">
+						<div
+							class="relative w-full pr-4 max-w-full flex-grow flex-1"
+						>
+							<h5
+								class="text-blueGray-400 uppercase font-bold text-xs"
+							>
+								montant total
+							</h5>
+							<span
+								class="font-semibold text-xl text-blueGray-700"
+								>{{total}} MAD</span
+							>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="mt-4 w-full lg:w-1/3 xl:w-3/12 px-5">
+			<div
+				class="relative flex flex-col min-w-0 break-words bg-white rounded mb-6 xl:mb-0 shadow-lg"
+			>
+				<div class="flex-auto p-4">
+					<div class="flex flex-wrap">
+						<div
+							class="relative w-full pr-4 max-w-full flex-grow flex-1"
+						>
+							<h5
+								class="text-blueGray-400 uppercase font-bold text-xs"
+							>
+								Le total des facteurs payés
+							</h5>
+							<span
+								class="font-semibold text-xl text-blueGray-700"
+								>{{total_payed}} MAD</span
+							>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="mt-4 w-full lg:w-1/3 xl:w-3/12 px-5">
+			<div
+				class="relative flex flex-col min-w-0 break-words bg-white rounded mb-6 xl:mb-0 shadow-lg"
+			>
+				<div class="flex-auto p-4">
+					<div class="flex flex-wrap">
+						<div
+							class="relative w-full pr-4 max-w-full flex-grow flex-1"
+						>
+							<h5
+								class="text-blueGray-400 uppercase font-bold text-xs"
+							>
+								Le total des facteurs impayés
+							</h5>
+							<span
+								class="font-semibold text-xl text-blueGray-700"
+								>{{total_no_payed}} MAD
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{% include "partials/table.html" %}
+</div>
+{% endblock %}

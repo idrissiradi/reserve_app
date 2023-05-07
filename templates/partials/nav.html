@@ -1,0 +1,46 @@
+{% load static %}
+<nav class="bg-gray-800">
+	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+		<div class="flex h-16 justify-between">
+			<div class="flex">
+				<a
+					href="{% url 'reserve:home' %}"
+					class="flex flex-shrink-0 items-center"
+				>
+					<img
+						class="block h-8 w-auto lg:hidden rounded-full"
+						src="{% static 'img/logo.jpeg' %}"
+						alt="Your Company"
+					/>
+					<img
+						class="hidden h-8 w-auto lg:block rounded-full"
+						src="{% static 'img/logo.jpeg' %}"
+						alt="Your Company"
+					/>
+				</a>
+			</div>
+			<div class="flex items-center">
+				<div class="flex items-center md:ml-12">
+					{% if user.admin or user.is_superuser %}
+					<a
+						href="{% url 'users:create_user' %}"
+						class="ml-6 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-3 py-2 text-xs font-medium text-white shadow-sm hover:bg-indigo-700"
+						>nouvel utilisateur</a
+					>
+					{% endif %}
+					<a
+						href="{% url 'reserve:statistics' %}"
+						class="ml-6 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-3 py-2 text-xs font-medium text-white shadow-sm hover:bg-indigo-700"
+						>statistiques</a
+					>
+
+					<a
+						href="{% url 'users:logout' %}"
+						class="ml-6 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-3 py-2 text-xs font-medium text-white shadow-sm hover:bg-indigo-700"
+						>Se déconnecter</a
+					>
+				</div>
+			</div>
+		</div>
+	</div>
+</nav>
