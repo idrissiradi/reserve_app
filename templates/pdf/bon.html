@@ -150,37 +150,17 @@
 
     <table class="invoice-info-container">
         <tr>
-            <td rowspan="2" class="client-name">Client :</td>
-            <td><strong>{{client}}</strong></td>
-        </tr>
-        <tr>
             <td></td>
         </tr>
         <tr>
-            <td>Date: <strong>{{pdf.created_at|date:"d-m-Y"}}</strong></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Adress: <strong>{{pdf.address}}</strong></td>
+            <td>Date: <strong>{{bon.created_at|date:"d-m-Y"}}</strong></td>
             <td></td>
         </tr>
         <tr>
             <td>
-                {% if pdf.type == "f" %}
-                Facture
-                {% elif pdf.type == "b" %}
-                Bon de commande
-                {% else %}
-                Devis
-                {% endif %} No:
-                <strong>{{pdf.id}}/{{pdf.created_at|date:"Y"}}</strong>
-                <strong>
-                    {% if pdf.is_payed %}
-                    est paye
-                    {% else %}
-                    impaye
-                    {% endif %}
-                </strong>
+                Bon de sortie
+                No:
+                <strong>{{bon.id}}/{{bon.created_at|date:"Y"}}</strong>
             </td>
             <td></td>
         </tr>
@@ -195,41 +175,9 @@
         </thead>
         <tbody>
             <tr>
-                <td>{{room.name}} x {{pdf.days}} jours</td>
-                <td class="bold">{{price}} MAD</td>
+                <td>{{bon.description}}</td>
+                <td class="bold">{{bon.price}} MAD</td>
             </tr>
-
-            {% for other in others %}
-            <tr>
-                <td>{{other.name}}</td>
-                <td class="bold">{{other.price}} MAD</td>
-            </tr>
-            {% endfor %}
-
-            {% if pdf.type == "f" %}
-            {% for plate in plates %}
-            <tr>
-                <td>
-                    {% if plate.type == "B" %}
-                    petit déjeuner
-                    {% elif plate.type == "L" %}
-                    déjeuner
-                    {% elif plate.type == "D"  %}
-                    dîner
-                    {% endif %}
-                </td>
-                <td class="bold">{{plate.price}} x {{plate.number}} </td>
-            </tr>
-            {% endfor %}
-            {% endif %}
-
-            {% if pdf.avance %}
-            <tr>
-                <td>Avance</td>
-                <td class="bold">-{{pdf.avance}} MAD</td>
-            </tr>
-            {% endif %}
-
         </tbody>
     </table>
 
@@ -237,29 +185,13 @@
         <thead>
             <tr>
                 <th>Total TTC</th>
-                <th>Mode de payment</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td class="large total">
-                    {{total}} MAD
-                </td>
-                <td class="payment-info">
-                    <div>
-                        {% if pdf.payment_type == "c" %}
-                        Cheque
-                        {% elif pdf.payment_type == "e" %}
-                        Espece
-                        {% elif pdf.payment_type == "t" %}
-                        TPE
-                        {% endif %}
-                        <br>
-                        {% if pdf.cheque_info %}
-                        {{pdf.cheque_info}}
-                        {% endif %}
-                    </div>
+                    {{bon.price}} MAD
                 </td>
                 <td class="payment-info">
                     <div>

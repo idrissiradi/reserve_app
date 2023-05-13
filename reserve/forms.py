@@ -1,6 +1,6 @@
 from django import forms
 
-from reserve.models import Room, Other, Reserve
+from reserve.models import Bon, Room, Other, Reserve
 
 
 class RoomCreateForm(forms.ModelForm):
@@ -57,5 +57,17 @@ class PdfOtherCreateForm(forms.ModelForm):
         model = Other
         fields = (
             "name",
+            "price",
+        )
+
+
+class BonForm(forms.ModelForm):
+    description = forms.CharField(label="Desination")
+    price = forms.CharField(label="Prix", required=False)
+
+    class Meta:
+        model = Bon
+        fields = (
+            "description",
             "price",
         )

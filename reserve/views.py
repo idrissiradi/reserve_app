@@ -16,8 +16,8 @@ from django.contrib.auth.decorators import login_required
 
 from users.mixins import AdminOnlyView, LoggedInOnlyView
 from users.models import User
-from reserve.forms import RoomCreateForm, ReserveCreateForm, PdfOtherCreateForm
-from reserve.models import Pdf, Room, Intem, Other, Plate, Reserve
+from reserve.forms import BonForm, RoomCreateForm, ReserveCreateForm, PdfOtherCreateForm
+from reserve.models import Bon, Pdf, Room, Intem, Other, Plate, Reserve
 
 
 class RoomListView(LoggedInOnlyView, ListView):
@@ -74,10 +74,8 @@ class StatisticsView(LoggedInOnlyView, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        users = User.objects.filter(admin=False).all()
         date = request.GET.get("reserve_date", None)  # type: ignore
         month = request.GET.get("month", None)
-        user = request.GET.get("user", None)
         payment_type = request.GET.get("payment_type", None)
 
         reservations = Reserve.objects.all()
@@ -88,12 +86,6 @@ class StatisticsView(LoggedInOnlyView, TemplateView):
             y, m, d = date.split("-")
             date = datetime.date(int(y), int(m), int(d))
             reservations = Reserve.objects.filter(created_at=date).all()
-
-        if user == "":
-            user = None
-        if user is not None:
-            user = User.objects.get(pk=user)
-            reservations = Reserve.objects.filter(user=user).all()
 
         if month == "":
             month = None
@@ -111,6 +103,9 @@ class StatisticsView(LoggedInOnlyView, TemplateView):
         other_total = 0.00
 
         for reserve in reservations:
+            others = Other.objects.filter(others=reserve).all()
+            for other in others:
+                other_total = other_total + float(other.price)
             total = float(total) + float(reserve.price) + other_total
             pdfs = Pdf.objects.filter(reserve=reserve, type="f", payment_type="e").all()
 
@@ -119,11 +114,26 @@ class StatisticsView(LoggedInOnlyView, TemplateView):
                     total_payed = float(total_payed) + float(reserve.price)
                 else:
                     total_no_payed = float(total_no_payed) + float(reserve.price)
+        bons = Bon.objects.all()
+        for bon in bons:
+            total = total - float(bon.price)
+        interm = Intem.objects.all()
+        data = []
+
+        for i in interm:
+            interm_total = 0.00
+            type = i.type
+            reserves = Reserve.objects.filter(interm__type=i.type).all()
+            for re in reserves:
+                interm_total = float(interm_total) + float(re.price)
+            data.append({"type": type, "total": interm_total})
+
         context["total"] = total
         context["total_payed"] = total_payed
         context["total_no_payed"] = total_no_payed
         context["reservations"] = reservations
-        context["users"] = users
+        context["interm"] = data
+
         return self.render_to_response(context)
 
 
@@ -137,6 +147,23 @@ class CreateRoom(LoggedInOnlyView, AdminOnlyView, FormView):
     def form_valid(self, form):
         form.save()  # type: ignore
         return super().form_valid(form)
+
+
+class CreateBon(LoggedInOnlyView, AdminOnlyView, FormView):
+    """New bon"""
+
+    template_name = "reserve/create_newbon.html"
+    form_class = BonForm
+    success_url = reverse_lazy("reserve:create_bon")
+
+    def form_valid(self, form):
+        form.save()  # type: ignore
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateBon, self).get_context_data(**kwargs)
+        context["bons"] = Bon.objects.all().order_by("-created_at")  # type: ignore
+        return context
 
 
 @login_required(login_url=reverse_lazy("users:login"))
@@ -263,8 +290,9 @@ def create_pdf(request, pk: int, reserve_pk: int):
             avance = request.POST["avance"]
             payment_type = request.POST["payment_type"]
             cheque_info = request.POST["cheque_info"]
-            charge = request.POST["charge"]
+            interm = request.POST["interm"]
 
+            intermid = Intem.objects.get(type=interm)
             reserve = Reserve.objects.get(pk=reserve_pk)
             days = request.POST["days"]
 
@@ -273,8 +301,9 @@ def create_pdf(request, pk: int, reserve_pk: int):
                 address=address,
                 days=days,
                 avance=avance,
-                charge=charge,
             )
+
+            Reserve.objects.filter(pk=reserve_pk).update(interm=intermid)
 
             if "is_payed" in request.POST:
                 pdf.is_payed = True
@@ -300,6 +329,7 @@ def create_pdf(request, pk: int, reserve_pk: int):
             pdf.save()
 
         else:
+            interms = Intem.objects.all()
             days = reserve.end_date - reserve.start_date
             others = Other.objects.all().order_by("name")
             pdfs = (
@@ -316,6 +346,7 @@ def create_pdf(request, pk: int, reserve_pk: int):
                     "pdfs": pdfs,
                     "client": reserve.client,
                     "price": reserve.price,
+                    "interms": interms,
                 },
             )
 
@@ -405,14 +436,8 @@ class GeneratePdf(View):
             avance = pdf.avance
 
         total: float = float(price) + res_total + other_total - float(avance)
-        if pdf.charge:
-            charge = float(pdf.charge)
-        else:
-            charge = 0.0
 
         total_word = num2words(total, lang="fr")
-        total_charge = float(charge) + other_total
-        total_charge_word = num2words(total_charge, lang="fr")
         context = {
             "pdf": pdf,
             "user": user,
@@ -422,8 +447,6 @@ class GeneratePdf(View):
             "total": total,
             "total_word": total_word,
             "client": client,
-            "total_charge": total_charge,
-            "total_charge_word": total_charge_word,
             "plates": plates,
         }
 
@@ -431,6 +454,20 @@ class GeneratePdf(View):
 
         response = HttpResponse(pdf, content_type="application/pdf")
         response["Content-Disposition"] = "attachment; filename=invoice.pdf"
+        return response
+
+
+class GenerateBonPdf(View):
+    def get(self, request, *args, **kwargs):
+        bon = Bon.objects.get(pk=kwargs["pk"])
+        total_word = num2words(bon.price, lang="fr")
+
+        context = {"bon": bon, "total_word": total_word}
+
+        pdf = render_to_pdf("pdf/bon.html", context)
+
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response["Content-Disposition"] = "attachment; filename=bon.pdf"
         return response
 
 
@@ -472,16 +509,12 @@ def send_rapport():
         for pdf in pdfs:
             total_espece = total_espece + float(pdf.reserve.price)
 
-        for pdf in pdfs_check:
-            if pdf.charge is not None:
-                charge_total = charge_total + float(pdf.charge)
-
-        for pdf in pdfs_tpe:
-            if pdf.charge is not None:
-                charge_total = charge_total + float(pdf.charge)
-
         for pdf in pdfs_facture:
             payment_type.append(pdf.payment_type)
+
+    bons = Bon.objects.all()
+    for bon in bons:
+        total = total - float(bon.price)
 
     total_day = total - charge_total
     subject, from_email, to = (

@@ -53,6 +53,9 @@ class Reserve(BaseModel):
     other = models.ManyToManyField(Other, related_name="others", blank=True)
     start_date = models.DateField()
     end_date = models.DateField()
+    interm = models.ForeignKey(
+        "Intem", on_delete=models.CASCADE, related_name="interms", blank=True, null=True
+    )
 
     def clean(self):
         if self.start_date >= self.end_date or self.start_date < timezone.now().date():
@@ -103,20 +106,10 @@ class Plate(BaseModel):
 
 
 class Intem(BaseModel):
-    TYPE_BOOKING = "B"
-    TYPE_CLIENT = "C"
-
-    TYPE_CHOICES = [
-        (TYPE_BOOKING, "Booking"),
-        (TYPE_CLIENT, "Client direct"),
-    ]
-    type = models.CharField(max_length=1, choices=TYPE_CHOICES, null=True, blank=True)
-    reserve = models.ForeignKey(
-        Reserve, on_delete=models.CASCADE, related_name="interms"
-    )
+    type = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self) -> str:
-        return f"{self.reserve} {self.type}"
+        return f"{self.type}"
 
     class Meta:
         verbose_name = "intermédiaire"
@@ -153,4 +146,8 @@ class Pdf(BaseModel):
         max_length=1, choices=TYPE_PAYMENT_CHOICES, blank=True, null=True
     )
     cheque_info = models.CharField("Cheque info", max_length=255, blank=True, null=True)
-    charge = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+
+
+class Bon(BaseModel):
+    description = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=15, decimal_places=2)

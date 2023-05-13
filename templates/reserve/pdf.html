@@ -43,10 +43,21 @@
                             </select>
                         </div>
 
-                        <div class="col-span-6">
+                        <div class="col-span-6 sm:col-span-3">
                             <label for="street-address" class="block text-sm font-medium text-gray-700">adresse</label>
                             <input type="text" name="address" id="street-address" autocomplete="street-address"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+                        </div>
+
+                        <div class="col-span-6 sm:col-span-3">
+                            <label for="interm" class="block text-sm font-medium text-gray-700">intermédiaire</label>
+                            <select id="interm" name="interm" autocomplete="interm-name"
+                                class="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm">
+                                {% for interm in interms %}
+                                <option>{{interm.type}}</option>
+                                {% endfor %}
+
+                            </select>
                         </div>
 
                         <div class="col-span-6 sm:col-span-6 lg:col-span-2">
@@ -94,13 +105,6 @@
                             <label for="cheque_info" class="block text-sm font-medium text-gray-700">Cheque code</label>
                             <input type="text" name="cheque_info" id="cheque_info" autocomplete="cheque_info"
                                 placeholder="si vous avez coché (Cheque)" class=" mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500
-                                focus:ring-indigo-500 sm:text-sm" />
-                        </div>
-
-                        <div class="col-span-6 sm:col-span-3">
-                            <label for="charge" class="block text-sm font-medium text-gray-700">Charge</label>
-                            <input type="number" step="0.01" name="charge" value="0.00" id="charge"
-                                autocomplete="charge" placeholder="si vous avez coché (Bon de commande)" class=" mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500
                                 focus:ring-indigo-500 sm:text-sm" />
                         </div>
 

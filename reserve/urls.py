@@ -9,6 +9,10 @@ urlpatterns = [
     path("list/", views.ReserveListView.as_view(), name="list_reserve"),
     path("statistiques/", views.StatisticsView.as_view(), name="statistics"),
     path("create/", views.CreateRoom.as_view(), name="create_room"),
+    path("create_bon/", views.CreateBon.as_view(), name="create_bon"),
+    path(
+        "create_bon/<int:pk>/", views.GenerateBonPdf.as_view(), name="generate_bon_pdf"
+    ),
     path("<int:pk>/", views.RoomDetailView.as_view(), name="room_detail"),
     path("<int:pk>/delete/", views.delete_room, name="delete_room"),
     path("<int:pk>/create/", views.create_reserve, name="create_reserve"),
